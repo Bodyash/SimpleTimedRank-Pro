@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -200,7 +201,7 @@ public class ConfigUserSql implements ConfigUser {
 		try (Connection conn = DriverManager.getConnection(
 				"jdbc:mysql://" + this.IP + ":" + this.port + "/" + this.DbName, this.user, this.password);
 				Statement st = conn.createStatement()) {
-			st.execute("UPDATE " + this.tableName + " SET status=-1 WHERE username='" + name + "'");
+			st.execute("UPDATE " + this.tableName + " SET status=-1, untildate=" + new Date().getTime() +  " WHERE username='" + name + "'");
 
 		} catch (SQLException e) {
 			e.printStackTrace();

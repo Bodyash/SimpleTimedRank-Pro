@@ -1,4 +1,4 @@
-package me.bodyash.simpletimedrankpro.listeners;
+package me.bodyash.simpletimedrankpro.bukkit.listeners;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -17,15 +17,23 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import me.bodyash.simpletimedrankpro.dao.ConfigUser;
 import me.bodyash.simpletimedrankpro.dao.User;
 import me.bodyash.simpletimedrankpro.utils.ConfigUtil;
+import me.bodyash.simpletimedrankpro.utils.updater.SpigotUpdater;
 
 public class TimeChecker implements Listener {
 
 	private ConfigUtil config;
 	private ConfigUser confU;
+	private SpigotUpdater spigotUpdater;
+	private boolean isCheckForUpdates;
 
-	public TimeChecker(ConfigUtil config, ConfigUser confU) {
+	public TimeChecker(ConfigUtil config, ConfigUser confU, SpigotUpdater spigotUpdater) {
 		this.config = config;
 		this.confU = confU;
+		this.isCheckForUpdates = config.isCheckForUpdates();
+		this.spigotUpdater = spigotUpdater;
+		if (this.isCheckForUpdates){
+			spigotUpdater.printResultToConsole();
+		}
 	}
 
 	public Long getPlayerDaysLeft(String playerName) {
@@ -38,9 +46,20 @@ public class TimeChecker implements Listener {
 
 	}
 
-	@EventHandler(priority = EventPriority.NORMAL)
+	@EventHandler(priority = EventPriority.MONITOR)
 	private void onPlayerJoin(PlayerJoinEvent e) {
 		this.checkPlayer(e.getPlayer());
+		if (this.isCheckForUpdates){
+			this.notifyOp(e.getPlayer());
+		}
+	}
+	
+	public void notifyOp(Player player){
+		if (player.isOp()){
+			if (this.spigotUpdater.isUpdateFound()){
+				player.sendMessage(config.getChatLogo() + "Update found. Download new version at https://www.spigotmc.org/resources/simpletimedrank-pro.33678/");
+			}
+		}
 	}
 
 	public void checkPlayer(Player player) {

@@ -7,8 +7,6 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import me.bodyash.simpletimedrankpro.Main;
-
 public class ConfigUtil {
 	
 	// DATABASE DATABASE DATABASE DATABASE DATABASE DATABASE DATABASE DATABASE
@@ -26,8 +24,6 @@ public class ConfigUtil {
 	private String databaseUserPath = String.valueOf(this.database) + "user";
 
 	private String databasePass = "root";
-
-
 	private String databasePassPath = String.valueOf(this.database) + "pass";
 	
 	private String databaseDB = "strp";
@@ -58,28 +54,22 @@ public class ConfigUtil {
 
 	public String cantCheckTimeMsg = "Can't check the time!";
 	private String cantCheckTimeMsgPath = String.valueOf(this.messages) + "CantCheckTimeMessage";
-	//New Messages
-/*	private String helpCommandMsg = "If you need help with the commands type '/strp help'.";
-	private String helpCommandMsgPath = String.valueOf(this.messages) + "HelpCommandMessage";
-	
-	private String timeLeftAsMsg = "Time left as";
-	private String timeLeftAsMsgPath = String.valueOf(this.messages) + "TimeLeftAsMessage";
-	
-	private String timeLeftDays = "Days";
-	private String timeLeftDaysPath = String.valueOf(this.messages) + "TimeLeftDays";
-	
-	private String cantFindThePlayer = "Can't find the player";
-	private String cantFindThePlayerPath = String.valueOf(this.messages) + "CantFindThePlayerMsg";
 
-	private String cantDemoteThePlayerMsg = 
-		*/
+	private String timeLeftDaysMsg = "Time left as %newRank%: %days% Day(s)";
+	private String timeLeftDaysMsgPath = String.valueOf(this.messages) + "TimeLeftDaysMsg";
+	
+	private String timeLeftHoursMsg = "Time left as %newRank%: %h% hours %m% minutes";
+	private String timeLeftHoursMsgPath = String.valueOf(this.messages) + "TimeLeftHoursMsg";
+	
+	private String helpCommandMsg = "&eIf you need help with the commands type &b/strp help";
+	private String helpCommandMsgPath = String.valueOf(this.messages) + "HelpCommandMessage";
 	
 	// OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS
 	private String options = "Options.";
 	public String checkMethod = "onPlayerJoin";
 	private String checkMethodPath = String.valueOf(this.options) + "CheckMethod";
 
-	public boolean checkForUpdates = true;
+	private boolean checkForUpdates = true;
 	private String checkForUpdatesPath = String.valueOf(this.options) + "CheckForUpdates";
 
 	public long interval = 5;
@@ -95,12 +85,11 @@ public class ConfigUtil {
 	private String demoteCommandPath = String.valueOf(this.options) + "DemoteCommand";
 
 	// OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER
-	public double versionNumber = this.versionNumberStorage;
-	private double versionNumberStorage = 1.0;
+	private double versionNumber = 1.0;
 	private String versionNumberPath = "VersionNumber";
 
-	public ConfigUtil(Main main) {
-		this.configFile = new File(main.getDataFolder(), "config.yml");
+	public ConfigUtil(File pluginFolder) {
+		this.configFile = new File(pluginFolder, "config.yml");
 		this.config = YamlConfiguration.loadConfiguration(configFile);
 		this.startup();
 	}
@@ -110,7 +99,20 @@ public class ConfigUtil {
 			Bukkit.getLogger().log(Level.WARNING, this.consoleLogo + "... Starting config creation ...");
 			this.createConfig();
 		} else {
-			
+			if (config.getString(versionNumberPath).isEmpty()){
+				Bukkit.getLogger().log(Level.WARNING, "Some problems when loading config /VersionNumber/");
+			}else{
+				Double tempversion = Double.valueOf(config.getString(versionNumberPath));
+				if (this.versionNumber > tempversion){
+					config.set(versionNumberPath, this.versionNumber);
+					if (tempversion == 0.0){
+						this.config.set(timeLeftDaysMsgPath, timeLeftDaysMsg);
+						this.config.set(timeLeftHoursMsgPath, timeLeftHoursMsg);
+						this.config.set(helpCommandMsgPath, helpCommandMsg);
+						this.saveConfig();
+					}
+				}
+			}
 			
 			
 			if (config.getString(databaseTypePath).isEmpty()){
@@ -197,12 +199,45 @@ public class ConfigUtil {
             } else {
                 this.lastDayMsg = this.config.getString(this.lastDayMsgPath);
             }
+            if (this.config.getString(this.chatLogoPath).isEmpty()) {
+                System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"ChatLogo\", using default message (&a[&6SimpleTimedRank &5PRO&a]). ..."));
+                this.chatLogo = "&a[&6SimpleTimedRank &5PRO&a]";
+            } else {
+                this.chatLogo = this.config.getString(this.chatLogoPath);
+            }
             if (this.config.getString(this.timeExpiredMsgPath).isEmpty()) {
                 System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"TimeExpiredMessage\", using default message (Your time has been expired!). ..."));
                 this.timeExpiredMsg = "Your time has been expired!";
             } else {
                 this.timeExpiredMsg = this.config.getString(this.timeExpiredMsgPath);
             }
+            
+            
+            if (this.config.getString(this.timeLeftDaysMsgPath).isEmpty()) {
+                System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"TimeLeftDaysMsg\", using default message (\"Time left as %newRank%: %days% Day(s)\"). ..."));
+                this.timeLeftDaysMsg = "Time left as %newRank%: %days% Day(s)";
+            } else {
+                this.timeLeftDaysMsg = this.config.getString(this.timeLeftDaysMsgPath);
+            }
+            if (this.config.getString(this.timeLeftHoursMsgPath).isEmpty()) {
+                System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"TimeLeftHoursMsg\", using default message (\"Time left as %newRank%: %h% hours %m% minutes\"). ..."));
+                this.timeLeftHoursMsg = "Time left as %newRank%: %h% hours %m% minutes";
+            } else {
+                this.timeLeftHoursMsg = this.config.getString(this.timeLeftHoursMsgPath);
+            }
+            if (this.config.getString(this.helpCommandMsgPath).isEmpty()) {
+                System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"HelpCommandMsg\", using default message (If you need help with the commands type '/str help'.). ..."));
+                this.helpCommandMsg = "&eIf you need help with the commands type &b/strp help";
+            } else {
+                this.helpCommandMsg = this.config.getString(this.helpCommandMsgPath);
+            }
+            if (this.config.getString(this.checkForUpdatesPath).isEmpty()) {
+                System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"CheckForUpdates\", using default value (true). ..."));
+                this.checkForUpdates = true;
+            }else{
+            	this.checkForUpdates = this.config.getBoolean(this.checkForUpdatesPath);
+            }
+            
             if (this.config.getString(this.cantCheckTimeMsgPath).isEmpty()) {
                 System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"CantCheckTimeMessage\", using default message (Can't check the time because you are not registered yet.). ..."));
                 this.cantCheckTimeMsg = "Can't check the time because you are not registered yet.";
@@ -254,6 +289,9 @@ public class ConfigUtil {
 		this.config.set(cantCheckTimeMsgPath, cantCheckTimeMsg);
 		this.config.set(timeExpiredMsgPath, timeExpiredMsg);
 		this.config.set(lastDayMsgPath, lastDayMsg);
+		this.config.set(timeLeftDaysMsgPath, timeLeftDaysMsg);
+		this.config.set(timeLeftHoursMsgPath, timeLeftHoursMsg);
+		this.config.set(helpCommandMsgPath, helpCommandMsg);
 		
 		this.config.set( checkMethodPath, checkMethod );
 		this.config.set( intervalPath, interval );
@@ -279,7 +317,7 @@ public class ConfigUtil {
 	}
 
 	
-	//UNUSED METHOD
+
 	public String colorize(String s) {
 		if (s == null)
 			return null;
@@ -363,6 +401,18 @@ public class ConfigUtil {
 
 	public String getDemoteCommand() {
 		return demoteCommand;
+	}
+
+	public String getTimeLeftDaysMsg() {
+		return this.colorize(timeLeftDaysMsg) + " ";
+	}
+
+	public String getTimeLeftHoursMsg() {
+		return colorize(timeLeftHoursMsg) + " ";
+	}
+
+	public String getHelpCommandMsg() {
+		return colorize(helpCommandMsg) + " ";
 	}
 	
 }

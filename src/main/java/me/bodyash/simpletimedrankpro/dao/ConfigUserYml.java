@@ -5,8 +5,6 @@ import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import me.bodyash.simpletimedrankpro.Main;
-
 public class ConfigUserYml implements ConfigUser {
 	private String consoleLogo;
 	private File configFile;
@@ -15,11 +13,11 @@ public class ConfigUserYml implements ConfigUser {
 	private String versionNumberPath;
 	private File dataFolder;
 
-	public ConfigUserYml(String consoleLogo, Main main) {
+	public ConfigUserYml(String consoleLogo, File dataFolder) {
 		this.versionNumberPath = "VersionNumber";
 		this.consoleLogo = consoleLogo;
-		this.dataFolder = main.getDataFolder();
-		this.configFile = new File(main.getDataFolder(), "users.yml");
+		this.dataFolder = dataFolder;
+		this.configFile = new File(this.dataFolder, "users.yml");
 		this.config = YamlConfiguration.loadConfiguration((File) this.configFile);
 		this.loadUsersConfig();
 	}
@@ -88,7 +86,7 @@ public class ConfigUserYml implements ConfigUser {
 			this.config.set("Users." + u.getUserName() + ".UntilDate", (Object) u.getUntilDate());
 			this.config.set("Users." + u.getUserName() + ".FromDate", (Object) u.getFromDate());
 			this.config.set("Users." + u.getUserName() + ".PromotedRank", (Object) u.getPromotedRank());
-			this.config.set("Users." + u.getUserName() + ".OldRank", (Object) u.getPromotedRank());
+			this.config.set("Users." + u.getUserName() + ".OldRank", (Object) u.getOldRank());
 			this.config.set("Users." + u.getUserName() + ".Status", (Object) u.getStatus());
 			this.config.save(this.configFile);
 		} catch (Exception e) {
@@ -107,7 +105,7 @@ public class ConfigUserYml implements ConfigUser {
 					config.getLong("Users." + playerName + ".FromDate"),
 					config.getString("Users." + playerName + ".PromotedRank"),
 					config.getString("Users." + playerName + ".OldRank"),
-					config.getInt("Users." + playerName + ".Status"));
+					Integer.parseInt(config.getString("Users." + playerName + ".Status")));
 			return user;
 		} catch (Exception e) {
 			return null;

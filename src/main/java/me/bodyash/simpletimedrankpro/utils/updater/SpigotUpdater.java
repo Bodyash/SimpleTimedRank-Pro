@@ -10,6 +10,8 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.bodyash.simpletimedrankpro.bungee.BungeeMain;
+
 public class SpigotUpdater {
 	private String WRITE_STRING;
 	private String version;
@@ -42,6 +44,23 @@ public class SpigotUpdater {
 		runSpigot();
 	}
 
+	public SpigotUpdater(BungeeMain bungeeMain) {
+		String RESOURCE_ID = "33678"; // change resource id
+		oldVersion = bungeeMain.getDescription().getVersion().replaceAll("-SNAPSHOT-", ".");
+		try {
+			String QUERY = "/api/general.php";
+			String HOST = "http://www.spigotmc.org";
+			connection = (HttpURLConnection) new URL(HOST + QUERY).openConnection();
+		} catch (IOException e) {
+			result = UpdateResult.FAIL_SPIGOT;
+			return;
+		}
+
+		String API_KEY = "98BE0FE67F88AB82B4C197FAF1DC3B69206EFDCC4D3B80FC83A00037510B99B4";
+		WRITE_STRING = "key=" + API_KEY + "&resource=" + RESOURCE_ID;
+		runSpigot();
+	}
+
 	private void runSpigot() {
 		connection.setDoOutput(true);
 		try {
@@ -51,15 +70,15 @@ public class SpigotUpdater {
 		} catch (IOException e) {
 			result = UpdateResult.FAIL_SPIGOT;
 		}
-		String version;
+		String currversion;
 		try {
-			version = new BufferedReader(new InputStreamReader(connection.getInputStream())).readLine();
+			currversion = new BufferedReader(new InputStreamReader(connection.getInputStream())).readLine();
 		} catch (Exception e) {
 			result = UpdateResult.FAIL_SPIGOT;
 			return;
 		}
-		if (version.length() <= 7) {
-			this.version = version.replace("[^A-Za-z]", "").replace("|", "");
+		if (currversion.length() <= 7) {
+			this.version = currversion.replace("[^A-Za-z]", "").replace("|", "").replace("-", "");
 			spigotCheckUpdate();
 			return;
 		}
@@ -101,6 +120,18 @@ public class SpigotUpdater {
 		}
 		if (result == UpdateResult.SPIGOT_UPDATE_AVAILABLE){
 			Bukkit.getLogger().log(Level.INFO, "[SimpleTimedRank Pro] UPDATE FOUND!");
+		}
+	}
+	
+	public void printResultToBungeeConsole(BungeeMain bungee) {
+		if(result == UpdateResult.FAIL_SPIGOT){
+			bungee.getLogger().log(Level.WARNING, "[SimpleTimedRank Pro] Update check fail");
+		}
+		if(result == UpdateResult.NO_UPDATE){
+			bungee.getLogger().log(Level.INFO, "[SimpleTimedRank Pro] Update not found");
+		}
+		if (result == UpdateResult.SPIGOT_UPDATE_AVAILABLE){
+			bungee.getLogger().log(Level.INFO, "[SimpleTimedRank Pro] UPDATE FOUND!");
 		}
 	}
 	
