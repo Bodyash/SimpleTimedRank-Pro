@@ -64,11 +64,11 @@ public class TimeChecker implements Listener {
 
 	public void checkPlayer(Player player) {
 		try {
-			User u = null;
-			if (confU.getUserData(player.getName()) != null) {
-				u = confU.getUserData(player.getName());
+			User u = confU.getUserData(player.getName());
+			if (u != null) {
 				if (u.getStatus() != -1) {
 					if ((new Date().getTime() - u.getUntilDate()) > 0) {
+						Bukkit.getLogger().log(Level.INFO, u.getUserName() + " Until: " + new Date(u.getUntilDate()).toString() + " as " + u.getPromotedRank());
 						player.sendMessage(config.getChatLogo() + " " + config.getTimeExpiredMsg());
 						Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), this.parseSyntax(u, config.getDemoteCommand()));
 						Bukkit.getLogger().log(Level.INFO, config.getConsoleLogo() + "Player " + u.getUserName()

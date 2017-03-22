@@ -145,18 +145,6 @@ public class ConfigUtil {
 			}else{
 				this.databasePass = config.getString(databasePassPath);
 			}
-			if (config.getString(databasePassPath).isEmpty()){
-				Bukkit.getLogger().log(Level.WARNING, "Some problems when loading config /DataPassword/");
-				this.databasePass = "root";
-			}else{
-				this.databasePass = config.getString(databasePassPath);
-			}
-			if (config.getString(databasePassPath).isEmpty()){
-				Bukkit.getLogger().log(Level.WARNING, "Some problems when loading config /DataPassword/");
-				this.databasePass = "root";
-			}else{
-				this.databasePass = config.getString(databasePassPath);
-			}
 			if (config.getString(databaseDBPath).isEmpty()){
 				Bukkit.getLogger().log(Level.WARNING, "Some problems when loading config /DataDB/");
 				this.databaseDB = "strp";
@@ -167,7 +155,7 @@ public class ConfigUtil {
 				Bukkit.getLogger().log(Level.WARNING, "Some problems when loading config /DataTable/");
 				this.databaseTable = "users";
 			}else{
-				this.databasePass = config.getString(databasePassPath);
+				this.databaseTable = config.getString(databaseTablePath);
 			}
 			if (this.config.getString(this.noPermMessagePath).isEmpty()) {
                 System.err.println(String.valueOf(consoleLogo + "... Something went wrong while setting the \"NoPermMessage\", using default message (\u00a73You don't have permissions to do that!). ..."));
