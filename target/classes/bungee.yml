@@ -1,6 +1,0 @@
-main: net.minecrell.serverlistplus.bungee.BungeePlugin
-
-name: ServerListPlus
-version: '3.4.7'
-
-author: 'Minecrell <https://github.com/Minecrell>'
