@@ -22,12 +22,14 @@ public class CommandListener {
 	private BukkitMain main;
 	private ConfigUser configUser;
 	private TimeChecker timeChecker;
+	private SimpleDateFormat sdf;
 
 	public CommandListener(ConfigUtil config, BukkitMain main, ConfigUser configUser, TimeChecker timeChecker) {
 		this.config = config;
 		this.main = main;
 		this.configUser = configUser;
 		this.timeChecker = timeChecker;
+		this.sdf = new SimpleDateFormat(this.config.getDateFormat());
 	}
 
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -204,12 +206,12 @@ public class CommandListener {
 	}
 
 	private boolean tempRank(CommandSender sender, Command command, String label, String[] args) {
-		SimpleDateFormat sdf = new SimpleDateFormat(config.getDateFormat() + " HH:mm");
+		SimpleDateFormat sdfWithTime = new SimpleDateFormat(config.getDateFormat() + " HH:mm");
 		if (args.length < 4 || args.length > 5) {
 			if (sender.hasPermission("simpletimedrank.help")) {
 				sender.sendMessage(String.valueOf(config.getChatLogo()) + config.getHelpCommandMsg());
 				sender.sendMessage(String.valueOf(config.getChatLogo()) + (Object) ChatColor.GOLD
-						+ "Correct usage: /tempRank [Player] [NewRank] [DaysOrMonths] (timeOfDay) [OldRank]");
+						+ "Correct usage: /tempRank [Player] [NewRank] [DaysOrMonthsOrDate] (timeOfDay) [OldRank]");
 				return false;
 			}
 			sender.sendMessage(config.getNoPermMessage());
@@ -219,17 +221,17 @@ public class CommandListener {
 			if (args.length == 4) {
 				if (this.checkIfCorrectDate(args[2])) {
 					try {
-						User tempUser = new User(args[0], parseNumsAndLatters(args[2]), new Date().getTime(), args[1],
+						User tempUser = new User(args[0], parseDateOrNums(args[2]), new Date().getTime(), args[1],
 								args[3], 1);
 						this.configUser.addUser(tempUser);
 						Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(),
 								(String) this.parseSyntax(tempUser, config.getPromoteCommand()));
 						sender.sendMessage(String.valueOf(config.getChatLogo()) + "The player " + args[0]
 								+ " has been promoted to the rank " + args[1] + " until "
-								+ sdf.format(new Date(parseNumsAndLatters(args[2]))) + "!");
+								+ sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
 						System.out.println(String.valueOf(config.getConsoleLogo()) + "The player " + args[0]
 								+ " has been promoted from the player " + sender.getName() + " from " + args[3] + " to "
-								+ args[1] + " until " + sdf.format(new Date(parseNumsAndLatters(args[2]))) + "!");
+								+ args[1] + " until " + sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
 						return true;
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -247,6 +249,7 @@ public class CommandListener {
 				sender.sendMessage(
 						String.valueOf(config.getChatLogo()) + "Correct date format: 5d or 2m (5 days, 2 months)");
 				sender.sendMessage(String.valueOf(config.getChatLogo()) + "Example: /temprank Player Vip 25d Guest");
+				sender.sendMessage(String.valueOf(config.getChatLogo()) + "Or: /temprank Player Vip 13.11.2019 Guest");
 			}
 			if (args.length == 5) {
 				if (this.checkIfCorrectDate(args[2]) && this.checkIfCorrectTime(args[3])) {
@@ -258,10 +261,10 @@ public class CommandListener {
 								(String) this.parseSyntax(tempUser, config.getPromoteCommand()));
 						sender.sendMessage(String.valueOf(config.getChatLogo()) + "The player " + args[0]
 								+ " has been promoted to the rank " + args[1] + " until "
-								+ sdf.format(new Date(this.parseNumsWithTime(args[2], args[3]))) + "!");
+								+ sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
 						System.out.println(String.valueOf(config.getConsoleLogo()) + "The player " + args[0]
 								+ " has been promoted from the player " + sender.getName() + " from " + args[4] + " to "
-								+ args[1] + " until " + sdf.format(new Date(this.parseNumsWithTime(args[2], args[3])))
+								+ args[1] + " until " + sdfWithTime.format(new Date(tempUser.getUntilDate()))
 								+ "!");
 						return true;
 					} catch (Exception e) {
@@ -278,13 +281,14 @@ public class CommandListener {
 				}
 				if (!this.checkIfCorrectDate(args[2])) {
 					sender.sendMessage(
-							String.valueOf(config.getChatLogo()) + "Correct date format: d or m (Days and Monthes)");
+							String.valueOf(config.getChatLogo()) + "Correct date format: d or m (Days and Monthes) or " + config.getDateFormat());
 				}
 				if (!this.checkIfCorrectTime(args[3])) {
 					sender.sendMessage(String.valueOf(config.getChatLogo()) + "Correct time format: hours:minutes");
 				}
 				sender.sendMessage(
 						String.valueOf(config.getChatLogo()) + "Example: /temprank Player Vip 14d 20:12 Guest");
+				sender.sendMessage(String.valueOf(config.getChatLogo()) + "Or: /temprank Player Vip 13.11.2019 20:12 Guest");
 			}
 		} else {
 			sender.sendMessage(config.getNoPermMessage());
@@ -296,22 +300,7 @@ public class CommandListener {
 
 	private long parseNumsWithTime(String stringDate, String stringTime) {
 		GregorianCalendar greg = new GregorianCalendar();
-		greg.setTime(new Date());
-		stringDate.toLowerCase();
-		int days = 0;
-		if (stringDate.endsWith("m")) {
-			if (stringDate.length() >= 3) {
-				days = Integer.parseInt(stringDate.substring(0, 2)) * 30;
-			} else if (stringDate.length() == 2) {
-				days = Integer.parseInt(stringDate.substring(0, 1)) * 30;
-			}
-		}
-
-		if (stringDate.endsWith("d")) {
-			days = Integer.parseInt(stringDate.substring(0, stringDate.length() - 1));
-		}
-
-		greg.add(Calendar.DAY_OF_YEAR, days);
+		greg.setTime(new Date(this.parseDateOrNums(stringDate)));
 		int hours = 0;
 		int minutes = 0;
 		StringTokenizer stringArgs;
@@ -363,6 +352,22 @@ public class CommandListener {
 		}
 		return true;
 	}
+	
+	private long parseDateOrNums(String stringDate){
+		if (stringDate.toLowerCase().contains("m") && stringDate.toLowerCase().contains("d")){
+			return parseNumsAndLatters(stringDate);
+		}else{
+			SimpleDateFormat sdf = new SimpleDateFormat(this.config.getDateFormat());
+			GregorianCalendar cal = new GregorianCalendar();
+			try{
+				cal.setTime(sdf.parse(stringDate));
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return cal.getTimeInMillis();
+		}
+	
+	}
 
 	private long parseNumsAndLatters(String stringDate) {
 		GregorianCalendar greg = new GregorianCalendar();
@@ -385,6 +390,7 @@ public class CommandListener {
 
 		return greg.getTimeInMillis();
 	}
+	
 
 	private boolean strp(CommandSender sender, Command command, String label, String[] args) {
 		if (args.length == 0) {
@@ -550,6 +556,13 @@ public class CommandListener {
 					temp = temp + 1;// Must Fix Warning in Eclipse :D Clear Code
 					return false;
 				}
+			}
+		}else {
+			try {
+				this.sdf.parse(stringDateToCheck);
+				return true;
+			} catch (Exception e) {
+				return false;
 			}
 		}
 		return true;

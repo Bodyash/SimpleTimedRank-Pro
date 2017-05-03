@@ -1,5 +1,5 @@
 name: SimpleTimedRankPro
-version: 1.1.1
+version: 1.2.0
 description: "With this plug-in you can promote or demote a player with a variable rank until a given date. This is very helpful for server owners who want to set a player to a special rank like VIP."
 author: Bodyash
 website: https://www.spigotmc.org/resources/simpletimedrank-pro.33678/
@@ -23,7 +23,7 @@ commands:
       description: Promotes a specified player until a given time.
       permissions: simpletimedrank.tempRank
       default: op
-      usage: /<command> [PlayerName] [NewRank] [DaysOrMonths] (TimeOfDay) [OldRank]
+      usage: /<command> [PlayerName] [NewRank] [DaysOrMonthsOrDate] (TimeOfDay) [OldRank]
       aliases: [upRank]
     downRank:
       description: Demotes a Player to his old rank and sets the promotion stats to "expired".
