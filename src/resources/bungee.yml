@@ -1,6 +1,6 @@
 main: net.minecrell.serverlistplus.bungee.BungeePlugin
 
-name: ServerListPlus
-version: '3.4.7'
+name: SimpleTimedRankPro
+version: '1.2.1'
 
-author: 'Minecrell <https://github.com/Minecrell>'
+author: 'Bodyash'

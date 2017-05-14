@@ -354,7 +354,7 @@ public class CommandListener {
 	}
 	
 	private long parseDateOrNums(String stringDate){
-		if (stringDate.toLowerCase().contains("m") && stringDate.toLowerCase().contains("d")){
+		if (stringDate.toLowerCase().contains("m") || stringDate.toLowerCase().contains("d")){
 			return parseNumsAndLatters(stringDate);
 		}else{
 			SimpleDateFormat sdf = new SimpleDateFormat(this.config.getDateFormat());
