@@ -2,6 +2,8 @@ package me.bodyash.simpletimedrankpro.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -43,16 +45,16 @@ public class ConfigUtil {
 
 	// MESSAGES MESSAGES MESSAGES MESSAGES MESSAGES MESSAGES MESSAGES MESSAGES
 	private String messages = "Messages.";
-	public String noPermMessage = "&3You don't have permissions to do that!";
+	private String noPermMessage = "&3You don't have permissions to do that!";
 	private String noPermMessagePath = String.valueOf(this.messages) + "NoPermMessage";
 
-	public String lastDayMsg = "This is your last day as %newRank%!";
+	private String lastDayMsg = "This is your last day as %newRank%!";
 	private String lastDayMsgPath = String.valueOf(this.messages) + "LastDayMessage";
 
-	public String timeExpiredMsg = "Your time has been expired!";
+	private String timeExpiredMsg = "Your time has been expired!";
 	private String timeExpiredMsgPath = String.valueOf(this.messages) + "TimeExpiredMessage";
 
-	public String cantCheckTimeMsg = "Can't check the time!";
+	private String cantCheckTimeMsg = "Can't check the time!";
 	private String cantCheckTimeMsgPath = String.valueOf(this.messages) + "CantCheckTimeMessage";
 
 	private String timeLeftDaysMsg = "Time left as %newRank%: %days% Day(s)";
@@ -66,26 +68,25 @@ public class ConfigUtil {
 	
 	// OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS OPTIONS
 	private String options = "Options.";
-	public String checkMethod = "onPlayerJoin";
+	private String checkMethod = "onPlayerJoin";
 	private String checkMethodPath = String.valueOf(this.options) + "CheckMethod";
 
 	private boolean checkForUpdates = true;
 	private String checkForUpdatesPath = String.valueOf(this.options) + "CheckForUpdates";
 
-	public long interval = 5;
+	private long interval = 5;
 	private String intervalPath = String.valueOf(this.options) + "Interval";
 
-	public String dateFormat = "dd.MM.yyyy";
+	private String dateFormat = "dd.MM.yyyy";
 	private String dateFormatPath = String.valueOf(this.options) + "DateFormat";
 
-	public String promoteCommand = "pex user %player% group set %newRank%";
-	private String promoteCommandPath = String.valueOf(this.options) + "PromoteCommand";
-
-	public String demoteCommand = "pex user %player% group set %oldRank%";
-	private String demoteCommandPath = String.valueOf(this.options) + "DemoteCommand";
+	private List<String>promoteCommands;
+	private List<String>demoteCommands;
+	private String promoteCommandsPath = String.valueOf(this.options) + "PromoteCommands";
+	private String demoteCommandsPath = String.valueOf(this.options) + "DemoteCommands";
 
 	// OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER OTHER
-	private double versionNumber = 1.0;
+	private double versionNumber = 1.1;
 	private String versionNumberPath = "VersionNumber";
 
 	public ConfigUtil(File pluginFolder) {
@@ -94,6 +95,7 @@ public class ConfigUtil {
 		this.startup();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void startup() {
 		if (!this.configFile.exists()) {
 			Bukkit.getLogger().log(Level.WARNING, this.consoleLogo + "... Starting config creation ...");
@@ -110,6 +112,16 @@ public class ConfigUtil {
 						this.config.set(timeLeftHoursMsgPath, timeLeftHoursMsg);
 						this.config.set(helpCommandMsgPath, helpCommandMsg);
 						this.saveConfig();
+					}
+					if(tempversion == 1.0){
+						List<String> promoteCommandsList = new ArrayList<String>();
+						promoteCommandsList.add("pex user %player% group set %newRank%");
+						promoteCommandsList.add("broadcast %player% has been promoted to %newRank%");
+						this.config.set(promoteCommandsPath, promoteCommandsList);
+						List<String> demoteCommandsList = new ArrayList<String>();
+						demoteCommandsList.add("pex user %player% group set %newRank%");
+						demoteCommandsList.add("broadcast %player% has been promoted to %newRank%");
+						this.config.set(demoteCommandsPath, demoteCommandsList);
 					}
 				}
 			}
@@ -169,17 +181,19 @@ public class ConfigUtil {
             } else {
                 this.dateFormat = this.config.getString(this.dateFormatPath);
             }
-            if (this.config.getString(this.promoteCommandPath).isEmpty()) {
-                System.err.println(String.valueOf(consoleLogo + "... Something went wrong while setting the \"PromoteCommand\", using default command (pex user %player% group set %newRank%). ..."));
-                this.promoteCommand = "pex user %player% group set %newRank%";
+            if (this.config.getList(this.promoteCommandsPath).isEmpty()) {
+                System.err.println(String.valueOf(consoleLogo + "... Something went wrong while setting the \"PromoteCommands\", using default command (pex user %player% group set %newRank%). ..."));
+        		promoteCommands.add("pex user %player% group set %newRank%");
+        		promoteCommands.add("broadcast %player% has been promoted to %newRank%");
             } else {
-                this.promoteCommand = this.config.getString(this.promoteCommandPath);
+                this.promoteCommands = (List<String>) this.config.getList(this.promoteCommandsPath);
             }
-            if (this.config.getString(this.demoteCommandPath).isEmpty()) {
+            if (this.config.getString(this.demoteCommandsPath).isEmpty()) {
                 System.err.println(String.valueOf(consoleLogo + "... Something went wrong while setting the \"DemoteCommand\", using default command (pex user %player% group set %oldRank%). ..."));
-                this.demoteCommand = "pex user %player% group set %oldRank%";
+        		demoteCommands.add("pex user %player% group set %newRank%");
+        		demoteCommands.add("broadcast %player% has been promoted to %newRank%");
             } else {
-                this.demoteCommand = this.config.getString(this.demoteCommandPath);
+                this.demoteCommands = (List<String>) this.config.getList(this.demoteCommandsPath);
             }
             if (this.config.getString(this.lastDayMsgPath).isEmpty()) {
                 System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"LastDayMessage\", using default message (This is your last day as %oldRank%!). ..."));
@@ -284,8 +298,16 @@ public class ConfigUtil {
 		this.config.set( checkMethodPath, checkMethod );
 		this.config.set( intervalPath, interval );
 		this.config.set( dateFormatPath, dateFormat );
-		this.config.set( promoteCommandPath, promoteCommand);
-		this.config.set( demoteCommandPath, demoteCommand );
+		
+		List<String> promoteCommandsList = new ArrayList<String>();
+		promoteCommandsList.add("pex user %player% group set %newRank%");
+		promoteCommandsList.add("broadcast %player% has been promoted to %newRank%");
+		this.config.set(promoteCommandsPath, promoteCommandsList);
+		
+		List<String> demoteCommandsList = new ArrayList<String>();
+		demoteCommandsList.add("pex user %player% group set %newRank%");
+		demoteCommandsList.add("broadcast %player% has been promoted to %newRank%");
+		this.config.set(demoteCommandsPath, demoteCommandsList);
 		
 		this.config.set(versionNumberPath, versionNumber);
 		
@@ -383,12 +405,12 @@ public class ConfigUtil {
 		return dateFormat;
 	}
 
-	public String getPromoteCommand() {
-		return promoteCommand;
+	public List<String> getPromoteCommands() {
+		return promoteCommands;
 	}
 
-	public String getDemoteCommand() {
-		return demoteCommand;
+	public List<String> getDemoteCommands() {
+		return demoteCommands;
 	}
 
 	public String getTimeLeftDaysMsg() {

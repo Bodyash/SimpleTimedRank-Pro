@@ -176,8 +176,11 @@ public class CommandListener {
 					User u = null;
 					u = this.configUser.getUserData(args[0]);
 					if (u != null && String.valueOf(u.getStatus()).compareToIgnoreCase("-1") != 0) {
-						Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), (String) this
-								.parseSyntax(u, this.config.getDemoteCommand()));
+						/*Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), (String) this
+								.parseSyntax(u, this.config.getDemoteCommand()));*/
+						for (String demoteCommand : this.config.getDemoteCommands()) {
+							Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), this.parseSyntax(u, demoteCommand));
+						}
 						sender.sendMessage(String.valueOf(config.getChatLogo()) + "Player " + args[0]
 								+ " was demoted from " + u.getPromotedRank() + " to "
 								+ u.getOldRank());
@@ -223,16 +226,49 @@ public class CommandListener {
 					try {
 						User tempUser = new User(args[0], parseDateOrNums(args[2]), new Date().getTime(), args[1],
 								args[3], 1);
-						this.configUser.addUser(tempUser);
-						Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(),
-								(String) this.parseSyntax(tempUser, config.getPromoteCommand()));
-						sender.sendMessage(String.valueOf(config.getChatLogo()) + "The player " + args[0]
-								+ " has been promoted to the rank " + args[1] + " until "
-								+ sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
-						System.out.println(String.valueOf(config.getConsoleLogo()) + "The player " + args[0]
-								+ " has been promoted from the player " + sender.getName() + " from " + args[3] + " to "
-								+ args[1] + " until " + sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
-						return true;
+						if (this.configUser.getUserData(tempUser.getUserName()) == null){
+							this.configUser.addUser(tempUser);
+							/*Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(),
+									(String) this.parseSyntax(tempUser, config.getPromoteCommand()));*/
+							for (String promoteCommand : this.config.getPromoteCommands()) {
+								Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), this.parseSyntax(tempUser, promoteCommand));
+							}
+							sender.sendMessage(String.valueOf(config.getChatLogo()) + "The player " + args[0]
+									+ " has been promoted to the rank " + args[1] + " until "
+									+ sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
+							System.out.println(String.valueOf(config.getConsoleLogo()) + "The player " + args[0]
+									+ " has been promoted from the player " + sender.getName() + " from " + args[3] + " to "
+									+ args[1] + " until " + sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
+							return true;
+						}else{
+							User existUser = this.configUser.getUserData(tempUser.getUserName());
+							if (args[1].equalsIgnoreCase(existUser.getPromotedRank()) && existUser.getStatus() == 1){
+								Long additionalTime = parseDateOrNums(args[2]);
+								Long extendedTime = existUser.getUntilDate() + (additionalTime - new Date().getTime());
+								existUser.setUntilDate(extendedTime);
+								this.configUser.addUser(existUser);
+								sender.sendMessage(String.valueOf(config.getChatLogo()) + "The player " + args[0]
+										+ "`s "+ existUser.getPromotedRank() + " rank has been extended by " + args[2] + " until "
+										+ sdfWithTime.format(new Date(existUser.getUntilDate())) + "!");
+								System.out.println(String.valueOf(config.getChatLogo()) + "The player " + args[0]
+										+ "`s "+ existUser.getPromotedRank() + " rank has been extended by " + args[2] + " until "
+										+ sdfWithTime.format(new Date(existUser.getUntilDate())) + "!");
+								return true;
+							}else{
+								this.configUser.addUser(tempUser);
+								for (String promoteCommand : this.config.getPromoteCommands()) {
+									Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), this.parseSyntax(tempUser, promoteCommand));
+								}
+								sender.sendMessage(String.valueOf(config.getChatLogo()) + "The player " + args[0]
+										+ " has been promoted to the rank " + args[1] + " until "
+										+ sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
+								System.out.println(String.valueOf(config.getConsoleLogo()) + "The player " + args[0]
+										+ " has been promoted from the player " + sender.getName() + " from " + args[3] + " to "
+										+ args[1] + " until " + sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
+								return true;
+							}
+						}
+
 					} catch (Exception e) {
 						e.printStackTrace();
 						sender.sendMessage(String.valueOf(config.getChatLogo())
@@ -257,8 +293,9 @@ public class CommandListener {
 						User tempUser = new User(args[0], parseNumsWithTime(args[2], args[3]), new Date().getTime(),
 								args[1], args[4], 1);
 						this.configUser.addUser(tempUser);
-						Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(),
-								(String) this.parseSyntax(tempUser, config.getPromoteCommand()));
+						for (String promoteCommand : this.config.getPromoteCommands()) {
+							Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), this.parseSyntax(tempUser, promoteCommand));
+						}
 						sender.sendMessage(String.valueOf(config.getChatLogo()) + "The player " + args[0]
 								+ " has been promoted to the rank " + args[1] + " until "
 								+ sdfWithTime.format(new Date(tempUser.getUntilDate())) + "!");
@@ -508,8 +545,7 @@ public class CommandListener {
 		msg = msg.replace("%player%", u.getUserName());
 		msg = msg.replace("%newRank%", u.getPromotedRank());
 		msg = msg.replace("%oldRank%", u.getOldRank());
-		msg = msg.replace("%days%",
-				Long.valueOf(TimeUnit.MILLISECONDS.toDays(u.getUntilDate() - u.getFromDate())).toString());
+		msg = msg.replace("%days%", Long.valueOf(TimeUnit.MILLISECONDS.toDays(u.getUntilDate() - new Date().getTime())).toString());
 		return msg;
 	}
 

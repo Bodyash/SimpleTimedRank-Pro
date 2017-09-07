@@ -4,7 +4,7 @@
 
 	<groupId>me.bodyash</groupId>
 	<artifactId>simpletimedrankpro</artifactId>
-	<version>1.2.1</version>
+	<version>1.4.1</version>
 	<packaging>jar</packaging>
 
 	<name>simpletimedrankpro</name>
@@ -25,14 +25,14 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.11.2-R0.1-SNAPSHOT</version>
+			<version>1.12-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<!--Bukkit API -->
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.11.2-R0.1-SNAPSHOT</version>
+			<version>1.12-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->

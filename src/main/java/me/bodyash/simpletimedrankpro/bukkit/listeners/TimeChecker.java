@@ -36,10 +36,20 @@ public class TimeChecker implements Listener {
 		}
 	}
 
-	public Long getPlayerDaysLeft(String playerName) {
+	public Long getPlayerDaysPromoted(String playerName) {
 		try {
 			User u = confU.getUserData(playerName);
 			return TimeUnit.MILLISECONDS.toDays(u.getUntilDate() - u.getFromDate());
+		} catch (Exception e) {
+			return null;
+		}
+
+	}
+	
+	public Long getPlayerDaysLeft(String playerName) {
+		try {
+			User u = confU.getUserData(playerName);
+			return TimeUnit.MILLISECONDS.toDays(u.getUntilDate() - new Date().getTime());
 		} catch (Exception e) {
 			return null;
 		}
@@ -70,7 +80,10 @@ public class TimeChecker implements Listener {
 					if ((new Date().getTime() - u.getUntilDate()) > 0) {
 						Bukkit.getLogger().log(Level.INFO, u.getUserName() + " Until: " + new Date(u.getUntilDate()).toString() + " as " + u.getPromotedRank());
 						player.sendMessage(config.getChatLogo() + " " + config.getTimeExpiredMsg());
-						Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), this.parseSyntax(u, config.getDemoteCommand()));
+						/*Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), this.parseSyntax(u, config.getDemoteCommand()));*/
+						for (String demoteCommand : this.config.getDemoteCommands()) {
+							Bukkit.dispatchCommand((CommandSender) Bukkit.getConsoleSender(), this.parseSyntax(u, demoteCommand));
+						}
 						Bukkit.getLogger().log(Level.INFO, config.getConsoleLogo() + "Player " + u.getUserName()
 								+ " was demoted to " + u.getOldRank());
 						confU.setUserTimeExpired(u.getUserName());
