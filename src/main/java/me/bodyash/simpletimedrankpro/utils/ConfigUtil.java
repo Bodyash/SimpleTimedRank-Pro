@@ -80,8 +80,8 @@ public class ConfigUtil {
 	private String dateFormat = "dd.MM.yyyy";
 	private String dateFormatPath = String.valueOf(this.options) + "DateFormat";
 
-	private List<String>promoteCommands;
-	private List<String>demoteCommands;
+	private List<String>promoteCommands = new ArrayList<String>();
+	private List<String>demoteCommands = new ArrayList<String>();
 	private String promoteCommandsPath = String.valueOf(this.options) + "PromoteCommands";
 	private String demoteCommandsPath = String.valueOf(this.options) + "DemoteCommands";
 
@@ -186,14 +186,14 @@ public class ConfigUtil {
         		promoteCommands.add("pex user %player% group set %newRank%");
         		promoteCommands.add("broadcast %player% has been promoted to %newRank%");
             } else {
-                this.promoteCommands = (List<String>) this.config.getList(this.promoteCommandsPath);
+                this.promoteCommands.addAll((List<String>) this.config.getList(this.promoteCommandsPath));
             }
             if (this.config.getString(this.demoteCommandsPath).isEmpty()) {
                 System.err.println(String.valueOf(consoleLogo + "... Something went wrong while setting the \"DemoteCommand\", using default command (pex user %player% group set %oldRank%). ..."));
-        		demoteCommands.add("pex user %player% group set %newRank%");
-        		demoteCommands.add("broadcast %player% has been promoted to %newRank%");
+        		demoteCommands.add("pex user %player% group set %oldRank%");
+        		demoteCommands.add("broadcast %player% has been promoted to %oldRank%");
             } else {
-                this.demoteCommands = (List<String>) this.config.getList(this.demoteCommandsPath);
+                this.demoteCommands.addAll((List<String>) this.config.getList(this.demoteCommandsPath));
             }
             if (this.config.getString(this.lastDayMsgPath).isEmpty()) {
                 System.err.println(String.valueOf(consoleLogo  + "... Something went wrong while setting the \"LastDayMessage\", using default message (This is your last day as %oldRank%!). ..."));
@@ -406,11 +406,11 @@ public class ConfigUtil {
 	}
 
 	public List<String> getPromoteCommands() {
-		return promoteCommands;
+		return this.promoteCommands;
 	}
 
 	public List<String> getDemoteCommands() {
-		return demoteCommands;
+		return this.demoteCommands;
 	}
 
 	public String getTimeLeftDaysMsg() {

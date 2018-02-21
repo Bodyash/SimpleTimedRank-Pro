@@ -49,7 +49,8 @@ public class TimeChecker implements Listener {
 	public Long getPlayerDaysLeft(String playerName) {
 		try {
 			User u = confU.getUserData(playerName);
-			return TimeUnit.MILLISECONDS.toDays(u.getUntilDate() - new Date().getTime());
+			Long days =  TimeUnit.MILLISECONDS.toDays(u.getUntilDate() - new Date().getTime());
+			return days;
 		} catch (Exception e) {
 			return null;
 		}
