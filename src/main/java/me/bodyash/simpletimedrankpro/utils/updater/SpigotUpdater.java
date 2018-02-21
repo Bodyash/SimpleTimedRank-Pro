@@ -31,16 +31,15 @@ public class SpigotUpdater {
 		String RESOURCE_ID = "33678"; // change resource id
 		oldVersion = plugin.getDescription().getVersion().replaceAll("-SNAPSHOT-", ".");
 		try {
-			String QUERY = "/api/general.php";
-			String HOST = "http://www.spigotmc.org";
+			String QUERY = "/legacy/update.php";
+			String HOST = "https://api.spigotmc.org";
 			connection = (HttpURLConnection) new URL(HOST + QUERY).openConnection();
 		} catch (IOException e) {
 			result = UpdateResult.FAIL_SPIGOT;
 			return;
 		}
 
-		String API_KEY = "98BE0FE67F88AB82B4C197FAF1DC3B69206EFDCC4D3B80FC83A00037510B99B4";
-		WRITE_STRING = "key=" + API_KEY + "&resource=" + RESOURCE_ID;
+		WRITE_STRING = "?resource=" + RESOURCE_ID;
 		runSpigot();
 	}
 
@@ -48,23 +47,22 @@ public class SpigotUpdater {
 		String RESOURCE_ID = "33678"; // change resource id
 		oldVersion = bungeeMain.getDescription().getVersion().replaceAll("-SNAPSHOT-", ".");
 		try {
-			String QUERY = "/api/general.php";
-			String HOST = "http://www.spigotmc.org";
+			String QUERY = "/legacy/update.php";
+			String HOST = "https://api.spigotmc.org";
 			connection = (HttpURLConnection) new URL(HOST + QUERY).openConnection();
 		} catch (IOException e) {
 			result = UpdateResult.FAIL_SPIGOT;
 			return;
 		}
 
-		String API_KEY = "98BE0FE67F88AB82B4C197FAF1DC3B69206EFDCC4D3B80FC83A00037510B99B4";
-		WRITE_STRING = "key=" + API_KEY + "&resource=" + RESOURCE_ID;
+		WRITE_STRING = "?resource=" + RESOURCE_ID;
 		runSpigot();
 	}
 
 	private void runSpigot() {
 		connection.setDoOutput(true);
 		try {
-			String REQUEST_METHOD = "POST";
+			String REQUEST_METHOD = "GET";
 			connection.setRequestMethod(REQUEST_METHOD);
 			connection.getOutputStream().write(WRITE_STRING.getBytes("UTF-8"));
 		} catch (IOException e) {

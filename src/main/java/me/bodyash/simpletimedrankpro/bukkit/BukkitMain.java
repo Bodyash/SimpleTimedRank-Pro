@@ -43,16 +43,22 @@ public class BukkitMain extends JavaPlugin {
 			configUser = new ConfigUserYml(config.getConsoleLogo(), this.getDataFolder());
 		}
 		// register TimeChecker and IntervalChecker
-		timeChecker = new TimeChecker(config, configUser, new SpigotUpdater(this));
-		if (config.getCheckMethod().compareToIgnoreCase("all") == 0) {
-			getServer().getPluginManager().registerEvents(timeChecker, this);
-			this.intervalChecker();
+		try {
+			//Moved timeCheker to try, what if not connection?
+			timeChecker = new TimeChecker(config, configUser, new SpigotUpdater(this));
+			if (config.getCheckMethod().compareToIgnoreCase("all") == 0) {
+				getServer().getPluginManager().registerEvents(timeChecker, this);
+				this.intervalChecker();
+			}
+			if (config.getCheckMethod().compareToIgnoreCase("interval") == 0) {
+				this.intervalChecker();
+			} else {
+				getServer().getPluginManager().registerEvents(timeChecker, this);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		if (config.getCheckMethod().compareToIgnoreCase("interval") == 0) {
-			this.intervalChecker();
-		} else {
-			getServer().getPluginManager().registerEvents(timeChecker, this);
-		}
+
 		//initialize command listener
 		commandListener = new CommandListener(config, this, configUser, timeChecker);
 		Bukkit.getLogger().log(Level.INFO,
